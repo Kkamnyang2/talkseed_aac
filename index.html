@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>TalkSeed AAC - 의사소통 앱</title>
-    <link rel="stylesheet" href="css/style.css?v=18">
+    <link rel="stylesheet" href="css/style.css?v=19">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 </head>
 <body>
@@ -238,9 +238,11 @@
                         <div style="display: flex; flex-direction: column; gap: 8px;">
                             <input type="text" id="new-category-name" placeholder="새 카테고리 이름" style="padding: 8px;">
                             <div style="display: flex; gap: 8px;">
+                                <input type="text" id="new-category-emoji" placeholder="이모티콘 (예: 🐶, 🍕)" maxlength="2" style="width: 60px; padding: 8px; font-size: 20px; text-align: center;">
                                 <input type="text" id="new-category-icon" placeholder="아이콘 (예: pets, restaurant)" value="folder" style="flex: 1; padding: 8px;">
                                 <input type="color" id="new-category-color" value="#9C27B0" style="width: 60px; padding: 4px;">
                             </div>
+                            <small style="color: #666; font-size: 12px;">💡 이모티콘 또는 Material 아이콘 중 하나를 선택하세요</small>
                             <div style="display: flex; gap: 8px;">
                                 <button type="button" class="btn-primary" onclick="createNewCategoryFromCard()" style="flex: 1; padding: 8px;">
                                     <i class="material-icons" style="font-size: 18px;">check</i>
@@ -251,6 +253,13 @@
                                 </button>
                             </div>
                         </div>
+                    </div>
+                    <!-- 카테고리 삭제 버튼 -->
+                    <div id="category-delete-section" style="margin-top: 8px;">
+                        <button type="button" class="btn-secondary" onclick="openDeleteCategoryFromCard()" style="width: 100%; padding: 8px; color: #f44336;">
+                            <i class="material-icons" style="font-size: 18px;">delete</i>
+                            카테고리 삭제
+                        </button>
                     </div>
                 </div>
                 <div class="form-group">
@@ -286,7 +295,12 @@
                     <input type="text" id="category-name" placeholder="예: 음식, 감정, 요청">
                 </div>
                 <div class="form-group">
-                    <label for="category-icon">아이콘</label>
+                    <label for="category-emoji">이모티콘 (선택)</label>
+                    <input type="text" id="category-emoji" placeholder="예: 🐶, 🍕, 🚗" maxlength="2" style="font-size: 24px; text-align: center; padding: 12px;">
+                    <small style="display: block; margin-top: 4px; color: #666;">이모티콘을 입력하면 아이콘 대신 표시됩니다</small>
+                </div>
+                <div class="form-group">
+                    <label for="category-icon">아이콘 (이모티콘 없을 때 사용)</label>
                     <select id="category-icon">
                         <optgroup label="음식 & 식사">
                             <option value="restaurant">🍽️ 식사/레스토랑</option>
@@ -555,8 +569,8 @@
     <!-- ResponsiveVoice API (한국어 TTS 최적화) -->
     <script src="https://code.responsivevoice.org/responsivevoice.js?key=JQZ0h1bp"></script>
     
-    <script src="js/storage.js?v=18"></script>
-    <script src="js/tts.js?v=18"></script>
-    <script src="js/app.js?v=18"></script>
+    <script src="js/storage.js?v=19"></script>
+    <script src="js/tts.js?v=19"></script>
+    <script src="js/app.js?v=19"></script>
 </body>
 </html>

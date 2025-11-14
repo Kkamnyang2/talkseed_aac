@@ -193,12 +193,17 @@ function renderSidebar() {
     `;
     
     currentCategories.forEach(cat => {
+        // 이모티콘이 있으면 이모티콘 사용, 없으면 Material 아이콘 사용
+        const iconHtml = cat.emoji 
+            ? `<span style="font-size: 24px;">${cat.emoji}</span>`
+            : `<i class="material-icons">${cat.icon}</i>`;
+        
         html += `
             <button class="category-item ${selectedCategory === cat.id ? 'active' : ''}"
                     onclick="selectCategory('${cat.id}')"
                     style="color: ${selectedCategory === cat.id ? 'white' : 'inherit'}; 
                            background: ${selectedCategory === cat.id ? cat.backgroundColor : 'transparent'}">
-                <i class="material-icons">${cat.icon}</i>
+                ${iconHtml}
                 <span class="category-name">${cat.name}</span>
             </button>
         `;
@@ -597,6 +602,7 @@ function addCategory() {
     
     const categoryData = {
         name: name,
+        emoji: document.getElementById('category-emoji').value.trim(),
         icon: document.getElementById('category-icon').value,
         backgroundColor: document.getElementById('category-bg-color').value
     };
@@ -607,6 +613,7 @@ function addCategory() {
     
     // 입력 필드 초기화
     document.getElementById('category-name').value = '';
+    document.getElementById('category-emoji').value = '';
     document.getElementById('category-icon').value = 'restaurant';
     document.getElementById('category-bg-color').value = '#2196F3';
     
@@ -627,20 +634,27 @@ function renderCategoryList() {
         return;
     }
     
-    list.innerHTML = currentCategories.map(cat => `
-        <div class="category-list-item" style="background-color: ${cat.backgroundColor}20">
-            <i class="material-icons" style="color: ${cat.backgroundColor}">${cat.icon}</i>
-            <div class="category-info">
-                <strong>${cat.name}</strong>
+    list.innerHTML = currentCategories.map(cat => {
+        // 이모티콘이 있으면 이모티콘 사용, 없으면 Material 아이콘 사용
+        const iconHtml = cat.emoji 
+            ? `<span style="font-size: 32px;">${cat.emoji}</span>`
+            : `<i class="material-icons" style="color: ${cat.backgroundColor}">${cat.icon}</i>`;
+        
+        return `
+            <div class="category-list-item" style="background-color: ${cat.backgroundColor}20">
+                ${iconHtml}
+                <div class="category-info">
+                    <strong>${cat.name}</strong>
+                </div>
+                <button onclick="editCategory('${cat.id}')" title="편집" style="color: var(--primary-color);">
+                    <i class="material-icons">edit</i>
+                </button>
+                <button onclick="deleteCategory('${cat.id}')" title="삭제">
+                    <i class="material-icons">delete</i>
+                </button>
             </div>
-            <button onclick="editCategory('${cat.id}')" title="편집" style="color: var(--primary-color);">
-                <i class="material-icons">edit</i>
-            </button>
-            <button onclick="deleteCategory('${cat.id}')" title="삭제">
-                <i class="material-icons">delete</i>
-            </button>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 /**
@@ -656,6 +670,7 @@ function editCategory(categoryId) {
     
     // 폼에 기존 값 채우기
     document.getElementById('category-name').value = category.name;
+    document.getElementById('category-emoji').value = category.emoji || '';
     document.getElementById('category-icon').value = category.icon;
     document.getElementById('category-bg-color').value = category.backgroundColor;
     
@@ -674,6 +689,7 @@ function editCategory(categoryId) {
  */
 function updateCategory() {
     const name = document.getElementById('category-name').value.trim();
+    const emoji = document.getElementById('category-emoji').value.trim();
     const icon = document.getElementById('category-icon').value;
     const bgColor = document.getElementById('category-bg-color').value;
     
@@ -684,6 +700,7 @@ function updateCategory() {
     
     AACStorage.updateCategory(editingCategoryId, {
         name: name,
+        emoji: emoji,
         icon: icon,
         backgroundColor: bgColor
     });
@@ -701,6 +718,7 @@ function updateCategory() {
     
     // 폼 초기화
     document.getElementById('category-name').value = '';
+    document.getElementById('category-emoji').value = '';
     document.getElementById('category-icon').value = 'restaurant';
     document.getElementById('category-bg-color').value = '#2196F3';
     
@@ -748,6 +766,7 @@ function toggleNewCategoryInput() {
         section.style.display = 'none';
         // 입력 필드 초기화
         document.getElementById('new-category-name').value = '';
+        document.getElementById('new-category-emoji').value = '';
         document.getElementById('new-category-icon').value = 'folder';
         document.getElementById('new-category-color').value = '#9C27B0';
     }
@@ -758,6 +777,7 @@ function toggleNewCategoryInput() {
  */
 function createNewCategoryFromCard() {
     const name = document.getElementById('new-category-name').value.trim();
+    const emoji = document.getElementById('new-category-emoji').value.trim();
     const icon = document.getElementById('new-category-icon').value.trim() || 'folder';
     const bgColor = document.getElementById('new-category-color').value;
     
@@ -775,6 +795,7 @@ function createNewCategoryFromCard() {
     // 카테고리 추가
     const categoryData = {
         name: name,
+        emoji: emoji,
         icon: icon,
         backgroundColor: bgColor,
         order: currentCategories.length + 1
@@ -792,7 +813,44 @@ function createNewCategoryFromCard() {
     // 입력 필드 숨기기
     toggleNewCategoryInput();
     
-    showToast(`"카테고리 "가 추가되었습니다`);
+    showToast(`"${name}" 카테고리가 추가되었습니다`);
+}
+
+/**
+ * 카드 다이얼로그에서 카테고리 삭제
+ */
+function openDeleteCategoryFromCard() {
+    const selectedCategoryName = document.getElementById('card-category').value;
+    
+    if (!selectedCategoryName) {
+        showToast('삭제할 카테고리를 먼저 선택해주세요');
+        return;
+    }
+    
+    const category = currentCategories.find(c => c.name === selectedCategoryName);
+    if (!category) {
+        showToast('선택한 카테고리를 찾을 수 없습니다');
+        return;
+    }
+    
+    // 해당 카테고리의 카드 개수 확인
+    const cardsInCategory = currentCards.filter(card => card.category === selectedCategoryName).length;
+    
+    let confirmMessage = `정말로 "${selectedCategoryName}" 카테고리를 삭제하시겠습니까?`;
+    if (cardsInCategory > 0) {
+        confirmMessage += `\n\n⚠️ 이 카테고리에는 ${cardsInCategory}개의 카드가 있습니다.\n카테고리를 삭제해도 카드는 삭제되지 않습니다.`;
+    }
+    
+    if (confirm(confirmMessage)) {
+        AACStorage.deleteCategory(category.id);
+        loadCategories();
+        updateCategorySelect();
+        
+        // 카테고리 선택 초기화
+        document.getElementById('card-category').value = '';
+        
+        showToast(`"${selectedCategoryName}" 카테고리가 삭제되었습니다`);
+    }
 }
 
 /**
